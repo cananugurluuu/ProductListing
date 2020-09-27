@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Product List</string>
+    <string name="title_nav_home">Product List</string>
+    <string name="title_nav_close">Close App</string>
+    <string name="products_loading">Products loading...</string>
+    <string name="products_not_loaded">Products could not be loaded!</string>
+    <string name="product_code">Product Code</string>
+    <string name="product_name">Product Name</string>
+    <string name="product_number">Product Number</string>
+    <string name="product_price">Adviced Price</string>
+    <string name="product_category">Category</string>
+    <string name="product_country">Country Code</string>
+    <string name="search_product">Search Product</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="not_connected">Not connected!</string>
+</resources>

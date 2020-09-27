@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Ürün Listesi</string>
+    <string name="title_nav_home">Ürün Listesi</string>
+    <string name="title_nav_close">Uygulamayı Kapat</string>
+    <string name="products_loading">Ürünler yükleniyor...</string>
+    <string name="products_not_loaded">Ürünler yüklenemedi!</string>
+    <string name="product_code">Ürün Kodu</string>
+    <string name="product_name">Ürün Adı</string>
+    <string name="product_number">Ürün Sayısı</string>
+    <string name="product_price">Önerilen Fiyat</string>
+    <string name="product_category">Kategori</string>
+    <string name="product_country">Ülke Kodu</string>
+    <string name="search_product">Ürün Ara</string>
+    <string name="navigation_drawer_open">Menüyü Aç</string>
+    <string name="navigation_drawer_close">Menüyü Kapat</string>
+    <string name="not_connected">İnternet bağlantınız yok!</string>
+</resources>
