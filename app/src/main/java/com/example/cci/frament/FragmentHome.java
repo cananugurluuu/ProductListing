@@ -151,7 +151,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener {
         protected void onPostExecute(List<Product> str) {
             super.onPostExecute(str);
             /*try {
-                personelDialog.dismiss();
+                pDialog.dismiss();
             } catch (Exception e) {
                 e.printStackTrace();
             }*/
@@ -169,6 +169,8 @@ public class FragmentHome extends Fragment implements View.OnClickListener {
 
     public void RefreshData(MainActivity activity)
     {
+        original_productlist.clear();
+        DisplayProductList(original_productlist);
         GetProduct g = new GetProduct(activity);
         g.execute();
     }
@@ -249,6 +251,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener {
             AdapterProductList mAdapter = new AdapterProductList(_fa, items.get
                     (items.size()-1), items);
             recyclerView.setAdapter(mAdapter);
+            mAdapter.notifyDataSetChanged();
             mAdapter.SetOnItemClickListener(new AdapterProductList.OnItemClickListener() {
                 @Override
                 public void onItemClick(View view, int position, Product product) {
