@@ -82,7 +82,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener {
         recyclerView = (RecyclerView) root_view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        //if (Tools.InternetConnection(getActivity())) {
+        if (Tools.InternetConnection(getActivity())) {
             /*try {
                 gp=new GetProductAsynTask(getActivity());
                 gp.execute();
@@ -95,9 +95,9 @@ public class FragmentHome extends Fragment implements View.OnClickListener {
             } catch (Exception e) {
                 Toast.makeText(ctx, getString(R.string.products_not_loaded), Toast.LENGTH_SHORT).show();
             }
-        /*} else{
+        } else{
             Toast.makeText(ctx, getString(R.string.not_connected), Toast.LENGTH_SHORT).show();
-        }*/
+        }
 
         selectedProduct=null;
         searchbox=(SearchView)root_view.findViewById(R.id.searchbox);
