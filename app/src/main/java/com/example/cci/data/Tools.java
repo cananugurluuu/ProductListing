@@ -1,6 +1,8 @@
 package com.example.cci.data;
 
 import android.app.Activity;
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.util.Log;
 import android.view.Window;
@@ -40,15 +42,14 @@ public class Tools {
     }
 
     public static boolean InternetConnection(Activity act) {
-        Runtime runtime = Runtime.getRuntime();
-        try {
-            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
-            int     exitValue = ipProcess.waitFor();
-            return (exitValue == 0);
+        ConnectivityManager conMgr = (ConnectivityManager) act.getSystemService (Context.CONNECTIVITY_SERVICE);
+        if (conMgr.getActiveNetworkInfo() != null
+                && conMgr.getActiveNetworkInfo().isAvailable()
+                && conMgr.getActiveNetworkInfo().isConnected()) {
+            return true;
+        } else {
+            return false;
         }
-        catch (IOException e)          { e.printStackTrace(); }
-        catch (InterruptedException e) { e.printStackTrace(); }
-        return false;
     }
 
 }
