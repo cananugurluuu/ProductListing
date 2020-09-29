@@ -1,11 +1,13 @@
 package com.example.cci.frament;
 
 import android.app.Dialog;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,6 +25,16 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.cci.R;
 import com.example.cci.activity.MainActivity;
 import com.example.cci.adapter.AdapterProductList;
@@ -36,14 +48,16 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FragmentHome extends Fragment implements View.OnClickListener {
 
     private View root_view;
     public static RecyclerView recyclerView;
     private ProgressDialog progressDialog;
-    private GetProduct gp;
+    private GetProductAsynTask gp;
     private String result="1";
     public FragmentActivity _fa;
     private SearchView searchbox;
@@ -54,6 +68,9 @@ public class FragmentHome extends Fragment implements View.OnClickListener {
     private Product selectedProduct;
     public ProgressDialog pDialog;
     private Context ctx;
+    public static final String TAG = "MyTag";
+    JsonArrayRequest jsonArrRequest; // String request tanımı
+    RequestQueue requestQueue;  // İstek kuyruğu tanımı
 
     @Nullable
     @Override
@@ -65,16 +82,22 @@ public class FragmentHome extends Fragment implements View.OnClickListener {
         recyclerView = (RecyclerView) root_view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        if (Tools.InternetConnection(getActivity())) {
-            try {
-                gp=new GetProduct(getActivity());
+        //if (Tools.InternetConnection(getActivity())) {
+            /*try {
+                gp=new GetProductAsynTask(getActivity());
                 gp.execute();
             } catch (Exception e) {
                 Toast.makeText(ctx, getString(R.string.products_not_loaded), Toast.LENGTH_SHORT).show();
+            }*/
+
+            try {
+                GetProductVolley();
+            } catch (Exception e) {
+                Toast.makeText(ctx, getString(R.string.products_not_loaded), Toast.LENGTH_SHORT).show();
             }
-        } else{
+        /*} else{
             Toast.makeText(ctx, getString(R.string.not_connected), Toast.LENGTH_SHORT).show();
-        }
+        }*/
 
         selectedProduct=null;
         searchbox=(SearchView)root_view.findViewById(R.id.searchbox);
@@ -97,10 +120,10 @@ public class FragmentHome extends Fragment implements View.OnClickListener {
         return root_view;
     }
 
-    public class GetProduct extends AsyncTask<String, Object, List<Product>> {
+    public class GetProductAsynTask extends AsyncTask<String, Object, List<Product>> {
 
         FragmentActivity fa;
-        public GetProduct(FragmentActivity activity) {
+        public GetProductAsynTask(FragmentActivity activity) {
             fa=activity;
             _fa=fa;
         }
@@ -117,6 +140,7 @@ public class FragmentHome extends Fragment implements View.OnClickListener {
                 e.printStackTrace();
             }
         }
+
         @Override
         protected List<Product> doInBackground(String... arg) {
             result="1";
@@ -167,12 +191,122 @@ public class FragmentHome extends Fragment implements View.OnClickListener {
         }
     }
 
-    public void RefreshData(MainActivity activity)
-    {
+    public void GetProductVolley() {
+        final List<Product> items = new ArrayList<>();
+        URL_POST = "https://anypoint.mulesoft.com/mocking/api/v1/links/c4326100-ed9e-4835-acf6-99435177eba0/json/sf-json?client_id=123456&client_secret=45454787";
+        requestQueue = Volley.newRequestQueue(ctx);
+        //StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_POST+ "users/2", new Response.Listener<String>() {
+        // Sağlanan URL’den bir dize yanıtı istenmektedir.
+
+        Response.Listener<JSONArray> listener = new Response.Listener<JSONArray>()
+        {
+            @Override
+            public void onResponse(JSONArray jsonArray) {
+                // TODO Auto-generated method stub
+                if (jsonArray != null) {
+                    try {
+                        if (jsonArray.length() > 0) {
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                try {
+                                    JSONObject jsonobject = jsonArray.getJSONObject(i);
+                                    Product product = new Product(jsonobject);
+                                    items.add(product);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            original_productlist=items;
+                            Collections.sort(items,new ProductSorter());
+                            DisplayProductList(items);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+        };
+        Response.ErrorListener errorListener = new Response.ErrorListener()
+        {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // TODO Auto-generated method stub
+                Log.d("snow", "onErrorResponse: " + error.getMessage());
+            }
+
+        };
+        jsonArrRequest = new JsonArrayRequest(Request.Method.GET, URL_POST, null, listener, errorListener) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Content-Type", "application/json; charset=utf-8");
+                headers.put("Accept", "application/json");
+                return headers;
+            }
+
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+        };
+        /*jsonObjRequest = new JsonArrayRequest(Request.Method.GET, URL_POST, new Response.Listener<JSONArray>() {
+
+            @Override
+            public void onResponse(JSONArray response) {
+                if (response != null) {
+                    try {
+                        jsonArr = new JSONArray((response));
+                        if (jsonArr.length() > 0) {
+                            for (int i = 0; i < jsonArr.length(); i++) {
+                                try {
+                                    JSONObject jsonobject = jsonArr.getJSONObject(i);
+                                    Product product = new Product(jsonobject);
+                                    items.add(product);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            //}
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("snow", "onErrorResponse: " + error.getMessage());
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Content-Type", "application/json; charset=utf-8");
+                headers.put("Accept", "application/json");
+                return headers;
+            }
+
+            @Override
+            public byte[] getBody() {
+                return "your json string".getBytes();
+            }
+
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+        };*/
+        requestQueue.add(jsonArrRequest);
+    }
+
+    public void RefreshData(MainActivity activity) {
         original_productlist.clear();
         DisplayProductList(original_productlist);
-        GetProduct g = new GetProduct(activity);
-        g.execute();
+        GetProductVolley();
+        /*GetProductAsynTask g = new GetProductAsynTask(activity);
+        g.execute();*/
     }
 
     @Override
@@ -301,4 +435,11 @@ public class FragmentHome extends Fragment implements View.OnClickListener {
         super.onPause();
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (requestQueue != null) {
+            requestQueue.cancelAll(TAG);
+        }
+    }
 }
